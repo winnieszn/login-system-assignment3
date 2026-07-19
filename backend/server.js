@@ -4,19 +4,23 @@ const db = require("./database");
 const app = express();
 const PORT = 3000;
 
-// Allow Express to read JSON data
 app.use(express.json());
-
-// Allow your frontend to access the backend
 app.use(express.static("../frontend"));
 
-// Login API
 app.post("/login", (req, res) => {
-    const { username, password } = req.body;
 
-    const sql = "SELECT * FROM Users WHERE username = ? AND password = ?";
+    const { email, password } = req.body;
 
-    db.get(sql, [username, password], (err, row) => {
+    console.log("Received Email:", email);
+    console.log("Received Password:", password);
+
+    const sql = "SELECT * FROM Users WHERE email = ? AND password = ?";
+
+    db.get(sql, [email, password], (err, row) => {
+
+        console.log("SQL Error:", err);
+        console.log("SQL Row:", row);
+
         if (err) {
             return res.status(500).json({
                 success: false,
@@ -25,20 +29,21 @@ app.post("/login", (req, res) => {
         }
 
         if (row) {
-            res.json({
+            return res.json({
                 success: true,
                 message: "Login Successful!"
             });
-        } else {
-            res.json({
-                success: false,
-                message: "Invalid Username or Password."
-            });
         }
+
+        return res.json({
+            success: false,
+            message: "Invalid Email or Password."
+        });
+
     });
+
 });
 
-// Start the server
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });
